@@ -75,5 +75,14 @@ Añade también un fichero `variables.tf` para definir las variables de entrada 
   ![imagen](https://github.com/user-attachments/assets/97ca8a81-6fca-4091-93ea-ddd0a9442b59)
 
 
+- Salida con el comando `terraform apply`
+
+  ![imagen](https://github.com/user-attachments/assets/0c37081e-f1f2-49fb-bc98-656d04ec50b9)
+
+- Comprobación en el portal de Azure
+
+  ![imagen](https://github.com/user-attachments/assets/7716d66b-67a0-46b4-9896-0770a9429740)
+
+
 
 
