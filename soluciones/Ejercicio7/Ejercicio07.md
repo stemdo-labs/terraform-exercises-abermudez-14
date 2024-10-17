@@ -28,3 +28,67 @@ Una vez completado el módulo, crea un ejemplo de uso que contenga la creación 
 Si se ha decidido desarrollar el apartado opcional, crea también un network security group asociado a una de las subnets anteriores. No es necesario que las reglas del network security group tenga sentido, simplemente añade reglas de ejemplo.
 
 El ejemplo de uso puede constar de un solo fichero `main.tf` si se desea.
+
+
+
+
+
+## Solución
+
+- Estructura de carpetas del ejercicio
+> [!NOTE]
+> Los tres módulos se definen al mismo nivel, llamándolos desde el `main.tf` principal.
+
+  ![image](https://github.com/user-attachments/assets/984d5be8-6b54-4dbe-8aae-2dce5b078287)
+
+- Archivo `main.tf`
+
+  ```terraform
+  provider "azurerm" {
+    features {}
+  }
+  
+  module "vnet_abermudez" {
+      source = "./modules/vnet_abermudez"
+  
+  
+      owner_tag = var.owner_tag
+      environment_tag = var.environment_tag
+      location = var.location
+      vnet_address_space = var.vnet_address_space
+      vnet_tags = var.vnet_tags
+      vnet_name = var.vnet_name
+      existent_resource_group_name = var.existent_resource_group_name
+  }
+  
+  
+  
+  module "subnet_abermudez" {
+    source = "./modules/subnet_abermudez"
+    subnet_name = var.subnet_name
+    resource_group_name = var.existent_resource_group_name
+    address_prefixes = var.address_prefixes
+    virtual_network_name = module.vnet_abermudez.vnet_name
+  
+  
+  }
+  
+  
+  
+  module "nsg_abermudez" {
+    source = "./modules/nsg_abermudez"
+    count = 2
+    location = var.location
+    resource_group_name = var.resource_group_name
+    id = module.subnet_abermudez.subnet_lista[count.index].id
+  }
+  
+  ```
+
+
+
+
+
+
+
+
