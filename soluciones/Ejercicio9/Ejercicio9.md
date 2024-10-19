@@ -61,3 +61,157 @@ En esta parte, se aprenderá a gestionar el archivo `tfstate` cuando un recurso 
 - [Documentación oficial de Terraform](https://registry.terraform.io/)
 - [Terraform import: Generating Configuration](https://developer.hashicorp.com/terraform/language/import/generating-configuration)
 - [Terraform state rm](https://developer.hashicorp.com/terraform/cli/commands/state/rm)
+
+---
+---
+---
+
+# Solución 
+
+
+## Primera parte
+
+### Desplegar los recursos iniciales
+
+- Se despliegan mediante el archivo `TF1.TF`
+  
+
+```terraform
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_key_vault" "vault_abermudez" {
+  name                        = "vaultabermudez"
+  location                    = "West Europe"
+  resource_group_name         = "rg-abermudez-dvfinlab"
+  tenant_id                   = "2835cee8-01b5-4561-b27c-2027631bcfe"
+  sku_name                    = "standard"
+}
+
+resource "azurerm_storage_account" "sta_abermudez" {
+  name                     = "cuentaabermudez"
+  resource_group_name      = "rg-abermudez-dvfinlab"
+  location                 = "West Europe"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+```
+
+- Ejecutamos `terraform apply`
+
+  ![image](https://github.com/user-attachments/assets/418ab3b2-77ba-4370-9f9f-a434a75aa2d6)
+
+- Resultado en el portal de Azure
+
+  ![image](https://github.com/user-attachments/assets/572904b5-6cba-4f92-9507-0c0fb85f4738)
+
+  
+### Importar los recursos a otro archivo de configuración
+
+- Importar utilizando el comando `terraform import`
+
+  ![image](https://github.com/user-attachments/assets/f1c758ba-3527-468e-bc62-e873ab8e7f6c)
+
+
+- Importar utilizando el bloque te terraform `import`
+
+  - Archivo TF2.tf  
+    
+  ```terraform
+
+  provider "azurerm" {
+  features {}
+  }
+  
+  resource "azurerm_key_vault" "vault_abermudez" {
+    name                        = "vaultabermudez"
+    location                    = "West Europe"
+    resource_group_name         = "rg-abermudez-dvfinlab"
+    tenant_id                   = "2835cee8-01b5-4561-b27c-2027631bcfe1"
+    sku_name                    = "standard"
+  }
+  
+  
+  resource "azurerm_storage_account" "sta_abermudez" {
+    name                     = "cuentaabermudez"          
+    resource_group_name      = "rg-abermudez-dvfinlab"    
+    location                 = "West Europe"              
+    account_tier             = "Standard"                 
+    account_replication_type = "LRS"                      
+  }
+  
+  import {
+    to = azurerm_storage_account.sta_abermudez
+    id = "/subscriptions/86f76907-b9d5-46fa-a39d-aff8432a1868/resourceGroups/rg-abermudez-dvfinlab/providers/Microsoft.Storage/storageAccounts/cuentaabermudez"
+  }
+
+  ```
+
+  - Ejecutamos `terraform apply`
+
+    ![image](https://github.com/user-attachments/assets/0407ded4-eeff-4410-9d48-29713c1a34cc)
+
+
+## Segunda parte
+
+
+- Eliminar el Key Vault utilizando TF1
+
+  - Lo hacemos mediante el comando `terraform destroy -target=azurerm_key_vault.vault_abermudez` 
+
+> [!CAUTION]
+> El error que nos muestra es porque no tenemos permisos para purgar el almacén de claves después de eliminarlo, pero como podemos ver después en el portal de Azure, ya no aparece.
+
+    
+  ![image](https://github.com/user-attachments/assets/8d7aab4a-3c37-4a95-9bd3-64f31254ea2e)
+    
+  - Comprobación en el portal de Azure
+
+    ![image](https://github.com/user-attachments/assets/4b7804aa-20ba-4321-81b0-e9b0413a9276)
+
+
+- Gestionar el estado del tfsate de TF2
+
+  - Realizamos el backup
+
+    ![image](https://github.com/user-attachments/assets/eb7cdacc-5b94-41a5-8ee1-8233df461c0e)
+
+  - Eliminamos el recurso del archivo de estado utilizando `terraform state rm` 
+
+    ![image](https://github.com/user-attachments/assets/21b22aac-fed7-41d3-bfe1-88b3176f48f2)
+
+  - Eliminamos el bloque del recurso `azurerm_key_vault` del archivo `TF2.tf`
+
+  ```terraform
+      provider "azurerm" {
+    features {}
+  }
+  
+  
+  resource "azurerm_storage_account" "sta_abermudez" {
+    name                     = "cuentaabermudez"          
+    resource_group_name      = "rg-abermudez-dvfinlab"    
+    location                 = "West Europe"              
+    account_tier             = "Standard"                 
+    account_replication_type = "LRS"                      
+  }
+  
+  import {
+    to = azurerm_storage_account.sta_abermudez
+    id = "/subscriptions/86f76907-b9d5-46fa-a39d-aff8432a1868/resourceGroups/rg-abermudez-dvfinlab/providers/Microsoft.Storage/storageAccounts/cuentaabermudez"
+  }
+
+  ```
+
+  - Ejecuta los comandos necesarios para aplicar los cambios
+
+    - Ejecutamos `terraform plan`
+
+  ![image](https://github.com/user-attachments/assets/fd76fe3c-19b7-47e5-9f5e-b787a6f2664b)
+
+> [!NOTE]
+> Como podemos observar , muestra que no hay ningún cambio pendiente, ya que hemos borrado el recurso primero del archivo de estado `terraform.tfsate` y después de nuestro archivo de configuración `TF2.tf`
+    
+  
