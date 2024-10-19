@@ -6,7 +6,7 @@
 
 ## Pre-requisitos
 
-- Haber completado el ejercicio05.
+- Haber completado el ejercicio05
 
 ## Enlaces de Interés
 
