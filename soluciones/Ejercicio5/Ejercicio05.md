@@ -7,7 +7,7 @@
 
 ## Pre-requisitos
 
-- Haber completado el ejercicio 04.
+- Haber completado el ejercicio 04
 
 ## Enlaces de Interés
 
